@@ -5,7 +5,7 @@
 #fitness
 #operators
 #selection
-#stop condition 
+#stop condition
 
 #pi 	= 0, if ai !E B
 #	= 1, if ai E B
@@ -14,7 +14,7 @@
 
 # operators
 # crossover
-# mutation 
+# mutation
 
 # selection : elitist
 
@@ -30,7 +30,7 @@ class Problem:
 		self.S = 520
 		self.filename = fname
 		#self.load()
-	
+
 	# def load(self):
 	# 	//TODO
 
@@ -63,7 +63,7 @@ class Population:
 			self.pop = sorted(self.pop, key = lambda Individual: Individual.f)
 			self.pop = self.pop[:n]
 			self.psize = n
-	
+
 	def best(self, n):
 		aux = sorted(self.pop, key = lambda Individual: Individual.f)
 		return aux[:n]
@@ -115,45 +115,7 @@ if __name__ == "__main__":
 	for i in range(len(result[0].v)):
 		if result[0].v[i] != 0:
 			s+=i+1
-			print i+1, 
+			print i+1,
 
 	print 'sum', s,
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
