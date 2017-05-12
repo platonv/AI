@@ -1,4 +1,4 @@
-#!/usr/bin/python3
+#!/usr/local/bin/python3
 
 import sys
 import random
@@ -101,7 +101,7 @@ class Population:
         return s
 
 class Algorithm:
-    def __init__(self, noI = 100, noG = 1000):
+    def __init__(self, noI = 100, noG = 500):
         self.noInd = noI
         self.noGen = noG
         self.population = Population(noI)
@@ -121,7 +121,7 @@ class Algorithm:
     def run(self):
         for k in range(self.noGen):
             self.iteration()
-        return self.population.best(1)
+        return self.population.best(1)[0]
 
     def crossover(self,i1,i2):
         pass
@@ -144,7 +144,9 @@ class UI:
         self.controller = controller
 
     def mainMenu(self):
-        print(self.controller.runAlgorithm())
+        r = self.controller.runAlgorithm()
+        print(r)
+        print('Fitness: ' + str(r.f))
 
     def printHelp(self):
         print('usage: ./evolutionary.py <filename>')
