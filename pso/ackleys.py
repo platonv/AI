@@ -30,7 +30,7 @@ class Swarm:
     def __init__(self):
         self.v=[Particle() for i in range(40)]
         self.numberOfParticles = 40
-        #print(self.v[1].pos)
+        # print(self.v[1].pos)
 
     def getBestNeighbour(self,particle):
         return particle
@@ -64,21 +64,19 @@ class Controller:
             aux = self.population.v[best]
             if trial > 0 and trial < 7:
                 new_velocity = self.population.v[i].velocity
-                #new_velocity = 0
                 aux = self.population.v[i]
-            self.population.v[i].velocity = new_velocity
-            #print(self.population.v[i].pos, " before")
-            self.population.v[i].update(aux)
-            #print(self.population.v[i].pos, " after")
+            # self.population.v[i].velocity = new_velocity
+            print(self.population.v[i].pos, " before")
+            # self.population.v[i].update(aux)
+            print(self.population.v[i].pos, " after")
         return self.population.getBestParticles()
 
 
     def runAlg(self, nu):
-        a = self.iteration()
+        pop = self.iteration()
         for _ in range(nu):
-            a = self.iteration()
-            #self.population = Swarm()
-        return a
+            pop = self.iteration()
+        return pop
 
     def loadParameters(self):
         with open(self.fileName, 'r') as f:
