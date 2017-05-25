@@ -1,102 +1,102 @@
+#!/bin/python3
+from collections import deque
+from math import sin, cos, sqrt, exp, pi
 from random import randint
-from random import random
+from random import random, uniform
 from functools import *
 import statistics
 import math
 
+omega = 0.4
+phiP = 0.025
+phiG = 0.025
+population = 100
+iterations = 1000
+particleSize = 3
+xMin = -10
+xMax = 10
+yMin = -10
+yMax = 10
+
+def ackley(x, y):
+    return -20*math.pow(math.exp(1), -0.2*math.sqrt(0.5*(x*x+y*y))) - math.pow(math.exp(1), 0.5*(math.cos(2*math.pi*x) + math.cos(2*math.pi*y))) + math.exp(1) + 20
+
+class Vec2:
+    def __init__(self, _x = 0, _y = 0):
+        self.x = _x
+        self.y = _y
+
+    def __repr__(self):
+        return self.x + ' ' + self.y
+
 class Particle:
-    def __init__(self):
-        self.pos = [randint(-10, 10) for _ in range(2)]
-        self.velocity = 0
-        self.fitness = self.evaluate()
+    def __init__(self, swarm):
+        self.pos = Vec2(uniform(xMin, xMax), uniform(yMin, yMax))
+        self.velocity = Vec2()
         self.bestPosition = self.pos
+        self.fitness = ackley(self.pos.x, self.pos.y)
         self.bestFitness = self.fitness
+        self.swarm = swarm
 
+    def updateVelocity(self, p, g):
+        newX = omega + self.velocity.x + phiP * p * self.bestPosition.x - self.pos.x + phiG * g * self.swarm.bestPosition.x - self.pos.x
+        newY = omega + self.velocity.y + phiP * p * self.bestPosition.y - self.pos.y + phiG * g * self.swarm.bestPosition.y - self.pos.y
+        self.velocity.x = newX
+        self.velocity.y = newY
 
-    def evaluate(self):
-        x = self.pos[0]
-        y = self.pos[1]
-        a = -20*math.pow(math.exp(1), -0.2*math.sqrt(0.5*(x*x+y*y))) - math.pow(math.exp(1), 0.5*(math.cos(2*math.pi*x) + math.cos(2*math.pi*y))) + math.exp(1) + 20
-        return a
+    def updatePosition(self):
+        newX = max(min(self.pos.x + self.velocity.x, xMax), xMin)
+        newY = max(min(self.pos.y + self.velocity.y, yMax), yMin)
+        self.pos.x = newX
+        self.pos.y = newY
+        self.fitness = ackley(self.pos.x, self.pos.y)
 
-    def update(self,particle):
-        s = 1 / (1 + math.pow((math.exp(1)), -particle.velocity))
-        for i in range(2):
-            if (random() > s):
-                self.pos[i] = randint(-10, 10)
-            self.fitness = self.bestFitness
+        if self.fitness < self.bestFitness:
+            self.bestFitness = ackley(self.pos.x, self.pos.y)
+            self.bestPosition = self.pos
+
+    def notifyBestPosition(self):
+        self.bestPosition = self.pos
 
 class Swarm:
     def __init__(self):
-        self.v=[Particle() for i in range(40)]
-        self.numberOfParticles = 40
-        # print(self.v[1].pos)
+        self.particles = [Particle(swarm=self) for _ in range(population)]
+        self.bestPosition = Vec2()
+        self.bestFitness = min([x.fitness for x in self.particles])
 
-    def getBestNeighbour(self,particle):
-        return particle
+    def iterate(self):
+        for particle in self.particles:
+            p, g = random(), random()
+            particle.updateVelocity(p, g)
+            particle.updatePosition()
 
-    def getBestParticles(self):
-        s = sorted(self.v, key = lambda x:x.evaluate(), reverse=True)
-        self.v = s
-        return s[-1]
-
+            if particle.bestFitness < self.bestFitness:
+                self.bestPosition = particle.bestPosition
+                self.bestFitness = particle.bestFitness
+        print(self.bestFitness)
 
 class Controller:
 
-    def __init__(self, population):
-        self.population = population
-        self.fileName = 'parameters.txt'
+    def __init__(self, swarm):
+        self.swarm = swarm
 
-    def iteration(self):
-        best = 0
-        inertia = 0.5
-        clf = 0.4
-        slf = 0.5
-        new_velocity = 0
-        for i in range(len(self.population.v)):
-            if self.population.v[i].bestFitness > self.population.v[best].bestFitness:
-                best = i
-        for i in range(len(self.population.v)):
-            new_velocity = inertia * self.population.v[i].velocity
-            new_velocity += clf * random() * (sum(self.population.v[i].bestPosition) - sum(self.population.v[i].pos))
-            new_velocity += slf * random() * (sum(self.population.v[best].bestPosition) - sum(self.population.v[i].pos))
-            trial = sum(self.population.v[i].pos) + new_velocity
-            aux = self.population.v[best]
-            if trial > 0 and trial < 7:
-                new_velocity = self.population.v[i].velocity
-                aux = self.population.v[i]
-            # self.population.v[i].velocity = new_velocity
-            print(self.population.v[i].pos, " before")
-            # self.population.v[i].update(aux)
-            print(self.population.v[i].pos, " after")
-        return self.population.getBestParticles()
-
-
-    def runAlg(self, nu):
-        pop = self.iteration()
-        for _ in range(nu):
-            pop = self.iteration()
-        return pop
-
-    def loadParameters(self):
-        with open(self.fileName, 'r') as f:
-            self.n = int(f.readline().strip())
-        f.close()
-
+    def runAlg(self):
+        for _ in range(iterations):
+            self.swarm.iterate()
 
 if __name__ == "__main__":
     s = Swarm()
     c = Controller(s)
-    c.runAlg(50)
+    c.runAlg()
 
-    results = []
-    s = Swarm()
-    c = Controller(s)
-    for i in range(0,30):
-        current = c.runAlg(i)
-        print("Best", current.pos, " value " + str(current.bestFitness))
-        results.append(current.bestFitness)
-        print('Mean:')
-    print(reduce(lambda x, y: x + y, results) / len(results))
-    print('Stdev:')
-    print(statistics.stdev(results))
+    # results = []
+    # s = Swarm()
+    # c = Controller(s)
+    # for i in range(0,30):
+    #     current = c.runAlg(i)
+    #     print("Best", current.pos, " value " + str(current.bestFitness))
+    #     results.append(current.bestFitness)
+    # print('Mean:')
+    # print(sum(results) / len(results))
+    # print('Stdev:')
+    # print(statistics.stdev(results))
