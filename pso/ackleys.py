@@ -74,6 +74,7 @@ class Swarm:
                 self.bestPosition = particle.bestPosition
                 self.bestFitness = particle.bestFitness
         print(self.bestFitness)
+        return self.bestFitness
 
 class Controller:
 
@@ -81,22 +82,18 @@ class Controller:
         self.swarm = swarm
 
     def runAlg(self):
+        results = []
         for _ in range(iterations):
-            self.swarm.iterate()
+            results.append(self.swarm.iterate())
+        return results
 
 if __name__ == "__main__":
     s = Swarm()
     c = Controller(s)
-    c.runAlg()
 
-    # results = []
-    # s = Swarm()
-    # c = Controller(s)
-    # for i in range(0,30):
-    #     current = c.runAlg(i)
-    #     print("Best", current.pos, " value " + str(current.bestFitness))
-    #     results.append(current.bestFitness)
-    # print('Mean:')
-    # print(sum(results) / len(results))
-    # print('Stdev:')
-    # print(statistics.stdev(results))
+    results = c.runAlg()
+
+    print('Mean:')
+    print(sum(results) / len(results))
+    print('Stdev:')
+    print(statistics.stdev(results))
